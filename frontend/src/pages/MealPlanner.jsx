@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Plus, Trash2, Edit } from "lucide-react";
+import { Calendar, Plus, Trash2, X } from "lucide-react";
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/api";
@@ -38,11 +38,15 @@ function MealPlanner() {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
-      setMealPlans(plansRes.data);
-      setRecipes(recipesRes.data);
 
-      if (plansRes.data.length > 0) {
-        setCurrentPlan(plansRes.data[0]);
+      const plansData = plansRes.data.data || [];
+      const recipesData = recipesRes.data.data || [];
+
+      setMealPlans(plansData);
+      setRecipes(recipesData);
+
+      if (plansData.length > 0) {
+        setCurrentPlan(plansData[0]);
       } else {
         createDefaultPlan();
       }
@@ -64,8 +68,8 @@ function MealPlanner() {
       const response = await axios.post(`${API_URL}/mealplans`, emptyPlan, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCurrentPlan(response.data);
-      setMealPlans([response.data]);
+      setCurrentPlan(response.data.data);
+      setMealPlans([response.data.data]);
     } catch (error) {
       console.error("Error creating plan:", error);
     }
@@ -90,11 +94,11 @@ function MealPlanner() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        `${API_URL}/mealplans/${currentPlan.id}`,
+        `${API_URL}/mealplans/${currentPlan._id}`,
         { ...currentPlan, meals: updatedMeals },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setCurrentPlan(response.data);
+      setCurrentPlan(response.data.data);
       setShowModal(false);
       setSelectedSlot(null);
     } catch (error) {
@@ -112,21 +116,21 @@ function MealPlanner() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        `${API_URL}/mealplans/${currentPlan.id}`,
+        `${API_URL}/mealplans/${currentPlan._id}`,
         { ...currentPlan, meals: updatedMeals },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setCurrentPlan(response.data);
+      setCurrentPlan(response.data.data);
     } catch (error) {
       console.error("Error updating meal plan:", error);
     }
   };
 
   const getRecipeForSlot = (day, mealType) => {
-    if (!currentPlan) return null;
+    if (!currentPlan || !currentPlan.meals) return null;
     const key = `${day}-${mealType}`;
     const recipeId = currentPlan.meals[key];
-    return recipes.find((r) => r.id === recipeId);
+    return recipes.find((r) => r._id === recipeId);
   };
 
   if (loading) {
@@ -147,7 +151,10 @@ function MealPlanner() {
             </h1>
             <p className="text-gray-600">Plan your weekly meals</p>
           </div>
-          <button className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-all flex items-center shadow-lg">
+          <button
+            onClick={createDefaultPlan}
+            className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-all flex items-center shadow-lg"
+          >
             <Calendar className="w-5 h-5 mr-2" />
             New Plan
           </button>
@@ -237,15 +244,15 @@ function MealPlanner() {
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >
-                ✕
+                <X className="w-6 h-6" />
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recipes.map((recipe) => (
                 <div
-                  key={recipe.id}
-                  onClick={() => handleAddRecipe(recipe.id)}
+                  key={recipe._id}
+                  onClick={() => handleAddRecipe(recipe._id)}
                   className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 cursor-pointer transition-all"
                 >
                   <img

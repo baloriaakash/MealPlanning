@@ -76,20 +76,24 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.pre("save", async function (next) {
+// Hash password before saving - FIXED FOR MONGOOSE 9.x
+userSchema.pre("save", async function () {
+  // Only hash the password if it has been modified (or is new)
   if (!this.isModified("password")) {
-    return next();
+    return;
   }
 
+  // Generate salt and hash password
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
+// Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+// Method to exclude password when converting to JSON
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;

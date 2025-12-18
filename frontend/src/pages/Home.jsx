@@ -26,7 +26,10 @@ function Home({ user }) {
       const response = await axios.get(`${API_URL}/recipes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setRecipes(response.data.slice(0, 3));
+
+      // Handle the response correctly - get data array and slice first 3
+      const recipesData = response.data.data || [];
+      setRecipes(recipesData.slice(0, 3));
     } catch (error) {
       console.error("Error fetching recipes:", error);
     } finally {
@@ -178,8 +181,8 @@ function Home({ user }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {recipes.map((recipe) => (
               <Link
-                key={recipe.id}
-                to={`/recipes/${recipe.id}`}
+                key={recipe._id}
+                to={`/recipes/${recipe._id}`}
                 className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1"
               >
                 <div className="relative h-48 overflow-hidden">
