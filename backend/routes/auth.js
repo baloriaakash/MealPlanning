@@ -1,5 +1,10 @@
-export const authAPI = {
-  register: (data) => api.post("/auth/register", data),
-  login: (data) => api.post("/auth/login", data),
-  getMe: () => api.get("/auth/me"),
-};
+const express = require("express");
+const router = express.Router();
+const { register, login, getMe } = require("../controllers/authController");
+const { protect } = require("../middleware/auth");
+
+router.post("/register", register);
+router.post("/login", login);
+router.get("/me", protect, getMe);
+
+module.exports = router;

@@ -1,9 +1,23 @@
-export const mealPlanAPI = {
-  getAll: () => api.get("/mealplans"),
-  getById: (id) => api.get(`/mealplans/${id}`),
-  create: (data) => api.post("/mealplans", data),
-  update: (id, data) => api.put(`/mealplans/${id}`, data),
-  delete: (id) => api.delete(`/mealplans/${id}`),
-  generateShoppingList: (data) =>
-    api.post("/mealplans/shopping-list/generate", data),
-};
+const express = require("express");
+const router = express.Router();
+const {
+  getMealPlans,
+  getMealPlan,
+  createMealPlan,
+  updateMealPlan,
+  deleteMealPlan,
+  generateShoppingList,
+} = require("../controllers/mealplanController");
+const { protect } = require("../middleware/auth");
+
+router.post("/shopping-list/generate", protect, generateShoppingList);
+
+router.route("/").get(protect, getMealPlans).post(protect, createMealPlan);
+
+router
+  .route("/:id")
+  .get(protect, getMealPlan)
+  .put(protect, updateMealPlan)
+  .delete(protect, deleteMealPlan);
+
+module.exports = router;

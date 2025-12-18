@@ -1,11 +1,27 @@
-export const collectionAPI = {
-  getAll: () => api.get("/collections"),
-  getById: (id) => api.get(`/collections/${id}`),
-  create: (data) => api.post("/collections", data),
-  update: (id, data) => api.put(`/collections/${id}`, data),
-  delete: (id) => api.delete(`/collections/${id}`),
-  addRecipe: (id, recipeId) =>
-    api.post(`/collections/${id}/recipes/${recipeId}`),
-  removeRecipe: (id, recipeId) =>
-    api.delete(`/collections/${id}/recipes/${recipeId}`),
-};
+const express = require("express");
+const router = express.Router();
+const {
+  getCollections,
+  getCollection,
+  createCollection,
+  updateCollection,
+  deleteCollection,
+  addRecipeToCollection,
+  removeRecipeFromCollection,
+} = require("../controllers/collectionController");
+const { protect } = require("../middleware/auth");
+
+router.route("/").get(protect, getCollections).post(protect, createCollection);
+
+router
+  .route("/:id")
+  .get(protect, getCollection)
+  .put(protect, updateCollection)
+  .delete(protect, deleteCollection);
+
+router
+  .route("/:id/recipes/:recipeId")
+  .post(protect, addRecipeToCollection)
+  .delete(protect, removeRecipeFromCollection);
+
+module.exports = router;
