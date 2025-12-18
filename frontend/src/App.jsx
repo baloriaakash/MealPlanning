@@ -13,7 +13,7 @@ import Home from "./pages/Home";
 import Recipes from "./pages/Recipes";
 import RecipeDetail from "./pages/RecipeDetail";
 import MealPlanner from "./pages/MealPlanner";
-import Collections from "./pages/Collections";
+import Collections from "./pages/Collection"; // Changed from "./pages/Collections" to "./pages/Collection"
 import ShoppingList from "./pages/ShoppingList";
 import Profile from "./pages/Profile";
 import AdminPanel from "./pages/AdminPanel";

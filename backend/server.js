@@ -22,13 +22,25 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Enable CORS
+// Enable CORS - Updated to accept requests from Vite dev server
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   })
 );
+
+// Request logging middleware (for debugging)
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.path}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log("Body:", {
+      ...req.body,
+      password: req.body.password ? "***" : undefined,
+    });
+  }
+  next();
+});
 
 // Mount routers
 app.use("/api/auth", authRoutes);

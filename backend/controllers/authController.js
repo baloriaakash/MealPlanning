@@ -18,14 +18,24 @@ exports.register = async (req, res) => {
       cuisinePreferences,
     } = req.body;
 
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide name, email, and password",
+      });
+    }
+
+    // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({
         success: false,
-        message: "User already exists with this email",
+        error: "User already exists with this email",
       });
     }
 
+    // Create user
     const user = await User.create({
       name,
       email,
@@ -47,13 +57,15 @@ exports.register = async (req, res) => {
           dietaryPreferences: user.dietaryPreferences,
           allergies: user.allergies,
           cuisinePreferences: user.cuisinePreferences,
+          createdAt: user.createdAt,
         },
       });
     }
   } catch (error) {
+    console.error("Registration error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      error: error.message || "Server error during registration",
     });
   }
 };
@@ -62,6 +74,7 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Validate input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -69,6 +82,7 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Check for user
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
@@ -78,6 +92,7 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Check password
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
@@ -87,6 +102,7 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Send response
     res.status(200).json({
       success: true,
       token: generateToken(user._id),
@@ -98,12 +114,14 @@ exports.login = async (req, res) => {
         dietaryPreferences: user.dietaryPreferences,
         allergies: user.allergies,
         cuisinePreferences: user.cuisinePreferences,
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Server error during login",
     });
   }
 };
@@ -112,14 +130,22 @@ exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
 
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
     res.status(200).json({
       success: true,
       data: user,
     });
   } catch (error) {
+    console.error("Get me error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Server error",
     });
   }
 };
