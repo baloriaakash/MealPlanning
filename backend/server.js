@@ -11,7 +11,7 @@ connectDB();
 
 // Route files
 const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/users");
+const userRoutes = require("./routes/user");
 const recipeRoutes = require("./routes/recipes");
 const mealplanRoutes = require("./routes/mealplans");
 const collectionRoutes = require("./routes/collections");
